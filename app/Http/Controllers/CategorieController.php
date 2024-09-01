@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategorieRequest;
 use App\Http\Requests\UpdateCategorieRequest;
 use App\Models\Categorie;
@@ -13,7 +14,8 @@ class CategorieController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Categorie::all();
+        return response()->json($categories);
     }
 
     /**
@@ -21,7 +23,7 @@ class CategorieController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -29,7 +31,8 @@ class CategorieController extends Controller
      */
     public function store(StoreCategorieRequest $request)
     {
-        //
+        $categorie = Categorie::create($request->all());
+        return response()->json($categorie, 201);
     }
 
     /**
@@ -37,7 +40,7 @@ class CategorieController extends Controller
      */
     public function show(Categorie $categorie)
     {
-        //
+        return response()->json($categorie);
     }
 
     /**
@@ -53,7 +56,8 @@ class CategorieController extends Controller
      */
     public function update(UpdateCategorieRequest $request, Categorie $categorie)
     {
-        //
+        $categorie->update($request->all());
+        return response()->json($categorie);
     }
 
     /**
@@ -61,6 +65,7 @@ class CategorieController extends Controller
      */
     public function destroy(Categorie $categorie)
     {
-        //
+        $categorie->delete();
+        return response()->json(null, 204);
     }
 }

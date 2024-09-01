@@ -1,0 +1,21 @@
+name: biblio-api
+
+services:
+  biblio:
+    image: biblio
+    ports:
+      - 8181:8181
+    depends_on:
+      - mysql-biblio
+    networks:
+      - biblio-network
+  mysql-biblio:
+    image: mysql:8.0.39
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - biblio-network
+
+networks:
+  biblio-network:
+    external: true

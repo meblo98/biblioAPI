@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreLivreRequest;
 use App\Http\Requests\UpdateLivreRequest;
 use App\Models\Livre;
+use Illuminate\Support\Facades\File;
+
+
+
 
 class LivreController extends Controller
 {
@@ -13,7 +17,9 @@ class LivreController extends Controller
      */
     public function index()
     {
-        //
+
+        $livres = Livre::all();
+        return $this->customJsonResponse("Liste des livres", $livres);
     }
 
     /**
@@ -29,7 +35,14 @@ class LivreController extends Controller
      */
     public function store(StoreLivreRequest $request)
     {
-        //
+        $livre = new Livre();
+        $livre->fill($request->validated());
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $livre->image = $image->store('livres', 'public');
+        }
+        $livre->save();
+        return $this->customJsonResponse("Livre créé avec succès", $livre, 201);
     }
 
     /**
@@ -37,7 +50,7 @@ class LivreController extends Controller
      */
     public function show(Livre $livre)
     {
-        //
+        return $this->customJsonResponse("Livre récupéré avec succès", $livre);
     }
 
     /**
@@ -53,7 +66,21 @@ class LivreController extends Controller
      */
     public function update(UpdateLivreRequest $request, Livre $livre)
     {
-        //
+        $livre->fill($request->validated());
+        if ($request->hasFile('image')) {
+
+            if (File::exists(public_path("storage/" . $livre->image))) {
+                File::delete(public_path($livre->image));
+            }
+            $image = $request->file('image');
+            $livre->image = $image->store('livres', 'public');
+        }
+        // dd($livre->image);
+        if ($livre->quantite > 0) {
+            $livre->update(['disponible' => true]);
+        }
+        $livre->update();
+        return $this->customJsonResponse("Livre modifié avec succès", $livre);
     }
 
     /**
@@ -61,6 +88,24 @@ class LivreController extends Controller
      */
     public function destroy(Livre $livre)
     {
-        //
+        $livre->delete();
+        return $this->customJsonResponse("Livre supprimé avec succès", null, 200);
+    }
+    public function restore($id)
+    {
+        $livre = Livre::onlyTrashed()->where('id', $id)->first();
+        $livre->restore();
+        return $this->customJsonResponse("Livre restauré avec succès", $livre);
+    }
+    public function forceDelete($id)
+    {
+        $livre = Livre::onlyTrashed()->where('id', $id)->first();
+        $livre->forceDelete();
+        return $this->customJsonResponse("Livre supprimé définitivement", null, 200);
+    }
+    public function trashed()
+    {
+        $livres = Livre::onlyTrashed()->get();
+        return $this->customJsonResponse("Livres archivés", $livres);
     }
 }
